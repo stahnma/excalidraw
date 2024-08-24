@@ -1,6 +1,7 @@
 import { COLOR_PALETTE } from "./colors";
 import type { EVENT } from "./constants";
 import {
+  CHINESE_HANDWRITTEN_FALLBACK_FONT,
   DEFAULT_VERSION,
   FONT_FAMILY,
   isDarwin,
@@ -89,7 +90,7 @@ export const getFontFamilyString = ({
   for (const [fontFamilyString, id] of Object.entries(FONT_FAMILY)) {
     if (id === fontFamily) {
       // TODO: we should fallback first to generic family names first, rather than directly to the emoji font
-      return `${fontFamilyString}, ${WINDOWS_EMOJI_FALLBACK_FONT}`;
+      return `${fontFamilyString}, ${CHINESE_HANDWRITTEN_FALLBACK_FONT}, ${WINDOWS_EMOJI_FALLBACK_FONT}`;
     }
   }
   return WINDOWS_EMOJI_FALLBACK_FONT;

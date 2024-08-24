@@ -132,6 +132,8 @@ export const FONT_FAMILY = {
   "Lilita One": 7,
   "Comic Shanns": 8,
   "Liberation Sans": 9,
+  // from here on fallback fonts only
+  Xiaolai: 1000,
 };
 
 export const THEME = {
@@ -155,7 +157,9 @@ export const FRAME_STYLE = {
   nameLineHeight: 1.25,
 };
 
+// TODO: consider adding a built-in fallback font for emojis
 export const WINDOWS_EMOJI_FALLBACK_FONT = "Segoe UI Emoji";
+export const CHINESE_HANDWRITTEN_FALLBACK_FONT = "Xiaolai";
 
 export const MIN_FONT_SIZE = 1;
 export const DEFAULT_FONT_SIZE = 20;

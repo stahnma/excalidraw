@@ -14,6 +14,11 @@ export const UNPKG_FALLBACK_URL = `https://unpkg.com/${
     : "@excalidraw/excalidraw" // fallback to latest package version (i.e. for app)
 }/dist/prod/`;
 
+export interface ExcalidrawFontFace {
+  uri: string;
+  descriptors?: FontFaceDescriptors;
+};
+
 export class ExcalidrawFont implements Font {
   public readonly urls: URL[];
   public readonly fontFace: FontFace;

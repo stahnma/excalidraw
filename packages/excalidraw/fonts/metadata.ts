@@ -22,13 +22,15 @@ export interface FontMetadata {
     lineHeight: number;
   };
   /** element to be displayed as an icon  */
-  icon: JSX.Element;
+  icon?: JSX.Element;
   /** flag to indicate a deprecated font */
   deprecated?: true;
   /** flag to indicate a server-side only font */
   serverSide?: true;
   /** flag to indiccate a local-only font */
   local?: true;
+  /** flag to indicate a fallback font */
+  fallback?: true;
 }
 
 export const FONT_METADATA: Record<number, FontMetadata> = {
@@ -106,13 +108,21 @@ export const FONT_METADATA: Record<number, FontMetadata> = {
       descender: -434,
       lineHeight: 1.15,
     },
-    icon: FontFamilyNormalIcon,
     serverSide: true,
+  },
+  [FONT_FAMILY.Xiaolai]: {
+    metrics: {
+      unitsPerEm: 1000,
+      ascender: 880,
+      descender: -144,
+      lineHeight: 1.15,
+    },
+    fallback: true,
   },
 };
 
-/** Unicode ranges */
-export const RANGES = {
+/** Unicode ranges defined by google fonts */
+export const GOOGLE_FONTS_RANGES = {
   LATIN:
     "U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD",
   LATIN_EXT:
@@ -123,6 +133,9 @@ export const RANGES = {
   VIETNAMESE:
     "U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1, U+01AF-01B0, U+0300-0301, U+0303-0304, U+0308-0309, U+0323, U+0329, U+1EA0-1EF9, U+20AB",
 };
+
+// TODO_CHINESE: get actual ranges for other fonts; or just gather some generic ones
+// TODO_CHINESE: consider splitting the existing fonts
 
 /** local protocol to skip the local font from registering or inlining */
 export const LOCAL_FONT_PROTOCOL = "local:";

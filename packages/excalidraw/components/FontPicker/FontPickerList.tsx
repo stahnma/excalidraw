@@ -21,6 +21,7 @@ import { t } from "../../i18n";
 import { fontPickerKeyHandler } from "./keyboardNavHandlers";
 import { Fonts } from "../../fonts";
 import type { ValueOf } from "../../utility-types";
+import { FontFamilyNormalIcon } from "../icons";
 
 export interface FontDescriptor {
   value: number;
@@ -62,11 +63,13 @@ export const FontPickerList = React.memo(
     const allFonts = useMemo(
       () =>
         Array.from(Fonts.registered.entries())
-          .filter(([_, { metadata }]) => !metadata.serverSide)
+          .filter(
+            ([_, { metadata }]) => !metadata.serverSide && !metadata.fallback,
+          )
           .map(([familyId, { metadata, fonts }]) => {
             const fontDescriptor = {
               value: familyId,
-              icon: metadata.icon,
+              icon: metadata.icon ?? FontFamilyNormalIcon,
               text: fonts[0].fontFace.family,
             };
 

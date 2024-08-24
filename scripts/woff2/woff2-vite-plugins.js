@@ -38,7 +38,7 @@ module.exports.woff2BrowserPlugin = () => {
     // aka dev mode equivalent of "export default x" above (resolveId + load)
     transform(code, id) {
       // treat https woff2 imports as a text
-      if (isDev && id.endsWith("/excalidraw/fonts/index.ts")) {
+      if (isDev && id.includes("/excalidraw/fonts/woff2")) {
         return code.replaceAll(
           /import\s+(\w+)\s+from\s+(["']https:\/\/.+?\.woff2["'])/g,
           `const $1 = $2`,
@@ -46,7 +46,7 @@ module.exports.woff2BrowserPlugin = () => {
       }
 
       // use CDN for Assistant
-      if (!isDev && id.endsWith("/excalidraw/fonts/assets/fonts.css")) {
+      if (!isDev && id.endsWith("/excalidraw/fonts/css/fonts.css")) {
         return `/* WARN: The following content is generated during excalidraw-app build */
 
       @font-face {
