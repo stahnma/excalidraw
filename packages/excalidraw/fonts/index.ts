@@ -9,26 +9,22 @@ import { ShapeCache } from "../scene/ShapeCache";
 import { isTextElement } from "../element";
 import { getFontString } from "../utils";
 import { FONT_FAMILY } from "../constants";
+import { FONT_METADATA, type FontMetadata } from "./metadata";
 import {
-  LOCAL_FONT_PROTOCOL,
-  FONT_METADATA,
-  GOOGLE_FONTS_RANGES,
-  type FontMetadata,
-} from "./metadata";
-import { ExcalidrawFont, type ExcalidrawFontFace, type Font } from "./ExcalidrawFont";
+  ExcalidrawFont,
+  type ExcalidrawFontFace,
+  type Font,
+} from "./ExcalidrawFont";
 import { getContainerElement } from "../element/textElement";
-
-import Virgil from "./assets/Virgil-Regular.woff2";
-import Excalifont from "./assets/Excalifont-Regular.woff2";
-import Cascadia from "./assets/CascadiaCode-Regular.woff2";
-import ComicShanns from "./assets/ComicShanns-Regular.woff2";
-import Liberation from "./assets/LiberationSans-Regular.woff2";
-
-import { NunitoFontFaces } from "./woff2/Nunito";
+import { CascadiaFontFaces } from "./woff2/Cascadia";
+import { ComicFontFaces } from "./woff2/Comic";
+import { ExcalifontFontFaces } from "./woff2/Excalifont";
+import { HelveticaFontFaces } from "./woff2/Helvetica";
+import { LiberationFontFaces } from "./woff2/Liberation";
 import { LilitaFontFaces } from "./woff2/Lilita";
+import { NunitoFontFaces } from "./woff2/Nunito";
 import { VirgilFontFaces } from "./woff2/Virgil";
 import { XiaolaiFontFaces } from "./woff2/Xiaolai";
-import { ExcalifontFontFaces } from "./woff2/Excalifont";
 
 export class Fonts {
   // it's ok to track fonts across multiple instances only once, so let's use
@@ -82,20 +78,23 @@ export class Fonts {
    * of the supplied fontFaces has not already been processed.
    */
   public onLoaded = (fontFaces: readonly FontFace[]) => {
-    if (
-      // bail if all fonts with have been processed. We're checking just a
-      // subset of the font properties (though it should be enough), so it
-      // can technically bail on a false positive.
-      fontFaces.every((fontFace) => {
-        const sig = `${fontFace.family}-${fontFace.style}-${fontFace.weight}-${fontFace.unicodeRange}`;
-        if (Fonts.loadedFontsCache.has(sig)) {
-          return true;
-        }
+    // bail if all fonts with have been processed. We're checking just a
+    // subset of the font properties (though it should be enough), so it
+    // can technically bail on a false positive.
+    let shouldBail = true;
+
+    for (const fontFace of fontFaces) {
+      const sig = `${fontFace.family}-${fontFace.style}-${fontFace.weight}-${fontFace.unicodeRange}`;
+
+      // make sure to update our cache with all the loaded font faces
+      if (!Fonts.loadedFontsCache.has(sig)) {
         Fonts.loadedFontsCache.add(sig);
-        return false;
-      })
-    ) {
-      return false;
+        shouldBail = false;
+      }
+    }
+
+    if (shouldBail) {
+      return;
     }
 
     let didUpdate = false;
@@ -213,36 +212,17 @@ export class Fonts {
       register.call(fonts, family, metadata, ...fontFaces);
     };
 
-    // init("Cascadia", FONT_METADATA[FONT_FAMILY.Cascadia], {
-    //   uri: Cascadia,
-    // });
-
-    // init("Comic Shanns", FONT_METADATA[FONT_FAMILY["Comic Shanns"]], {
-    //   uri: ComicShanns,
-    // });
-
-     init("Excalifont", ...ExcalifontFontFaces);
-
-    // // keeping for backwards compatibility reasons, uses system font (Helvetica on MacOS, Arial on Win)
-    // init("Helvetica", FONT_METADATA[FONT_FAMILY.Helvetica], {
-    //   uri: LOCAL_FONT_PROTOCOL,
-    // });
-
-    // // used for server-side pdf & png export instead of helvetica (technically does not need metrics, but kept in for consistency)
-    // init("Liberation Sans", FONT_METADATA[FONT_FAMILY["Liberation Sans"]], {
-    //   uri: Liberation,
-    // });
-
+    init("Cascadia", ...CascadiaFontFaces);
+    init("Comic Shanns", ...ComicFontFaces);
+    init("Excalifont", ...ExcalifontFontFaces);
+    // keeping for backwards compatibility reasons, uses system font (Helvetica on MacOS, Arial on Win)
+    init("Helvetica", ...HelveticaFontFaces);
+    // used for server-side pdf & png export instead of helvetica (technically does not need metrics, but kept in for consistency)
+    init("Liberation Sans", ...LiberationFontFaces);
     init("Lilita One", ...LilitaFontFaces);
     init("Nunito", ...NunitoFontFaces);
-    // prioritize Virgil (last font face wins)
     init("Virgil", ...VirgilFontFaces);
-    // TODO_CHINESE: trafeoffs here are
-    // + font faces are defined just once (not per each family) and they could could be shared between multiple family (though browsers might be smart enough to share the same font resource between multiple fontface definitions)
-    // + measureText API might struggle if everything is defined within the same font face (assumption, no proof)
-    // - server-side built process needs to be manually adjusted (to skip creating ttf for this and instead merge it with existing families)
-    // - subsetting needs to account for each fallback
-    init ("Xiaolai", ...XiaolaiFontFaces);
+    init("Xiaolai", ...XiaolaiFontFaces);
 
     Fonts._initialized = true;
 
