@@ -2,9 +2,9 @@ import LilitaLatin from "https://fonts.gstatic.com/s/lilitaone/v15/i7dPIFZ9Zz-WB
 import LilitaLatinExt from "https://fonts.gstatic.com/s/lilitaone/v15/i7dPIFZ9Zz-WBtRtedDbYE98RXi4EwSsbg.woff2";
 
 import { GOOGLE_FONTS_RANGES } from "../../metadata";
-import type { ExcalidrawFontFace } from "../../ExcalidrawFont";
+import { type ExcalidrawFontFaceDescriptor } from "../..";
 
-export const LilitaFontFaces: ExcalidrawFontFace[] = [
+export const LilitaFontFaces: ExcalidrawFontFaceDescriptor[] = [
   {
     uri: LilitaLatinExt,
     descriptors: { unicodeRange: GOOGLE_FONTS_RANGES.LATIN_EXT },

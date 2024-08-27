@@ -9,7 +9,13 @@ import type {
 import type { Bounds } from "../element/bounds";
 import { getCommonBounds, getElementAbsoluteCoords } from "../element/bounds";
 import { renderSceneToSvg } from "../renderer/staticSvgScene";
-import { arrayToMap, distance, getFontString, toBrandedType } from "../utils";
+import {
+  arrayToMap,
+  distance,
+  getFontString,
+  PromisePool,
+  toBrandedType,
+} from "../utils";
 import type { AppState, BinaryFiles } from "../types";
 import {
   DEFAULT_EXPORT_PADDING,
@@ -18,6 +24,7 @@ import {
   SVG_NS,
   THEME,
   THEME_FILTER,
+  FONT_FAMILY_FALLBACKS,
 } from "../constants";
 import { getDefaultAppState } from "../appState";
 import { serializeAsJSON } from "../data/json";
@@ -39,7 +46,6 @@ import type { RenderableElementsMap } from "./types";
 import { syncInvalidIndices } from "../fractionalIndex";
 import { renderStaticScene } from "../renderer/staticScene";
 import { Fonts } from "../fonts";
-import type { Font } from "../fonts/ExcalidrawFont";
 
 const SVG_EXPORT_TAG = `<!-- svg-source:excalidraw -->`;
 
@@ -439,6 +445,7 @@ const getFontFaces = async (
   elements: readonly ExcalidrawElement[],
 ): Promise<string[]> => {
   const fontFamilies = new Set<number>();
+  const characters = new Set<string>();
   const codePoints = new Set<number>();
 
   for (const element of elements) {
@@ -449,52 +456,85 @@ const getFontFaces = async (
     fontFamilies.add(element.fontFamily);
 
     // gather unique codepoints only when inlining fonts
-    for (const codePoint of Array.from(element.originalText, (u) =>
-      u.codePointAt(0),
-    )) {
-      if (codePoint) {
-        codePoints.add(codePoint);
+    for (const char of element.originalText) {
+      if (!characters.has(char)) {
+        characters.add(char);
+        codePoints.add(char.codePointAt(0)!);
       }
     }
   }
 
-  const getSource = (font: Font) => {
-    try {
-      // retrieve font source as dataurl based on the used codepoints
-      return font.getContent(codePoints);
-    } catch {
-      // fallback to font source as a url
-      return font.urls[0].toString();
-    }
-  };
+  const uniqueChars = Array.from(characters).join("");
 
-  const fontFaces = await Promise.all(
-    Array.from(fontFamilies).map(async (x) => {
-      const { fonts, metadata } = Fonts.registered.get(x) ?? {};
+  // quick check for Han (might match a bit more, but that's fine)
+  if (uniqueChars.match(/\p{Script=Han}/u)) {
+    fontFamilies.add(FONT_FAMILY.Xiaolai);
+  }
 
-      if (!Array.isArray(fonts)) {
-        console.error(
-          `Couldn't find registered fonts for font-family "${x}"`,
-          Fonts.registered,
-        );
-        return [];
-      }
+  const iterator = fontFacesIterator(fontFamilies, uniqueChars, codePoints);
 
-      if (metadata?.local) {
-        // don't inline local fonts
-        return [];
-      }
+  // don't trigger hundreds/thousands of concurrent requests, instead go 3 requests at a time, in a controlled manner
+  // in other words, does not block the main thread and avoids related issues, including potential rate limits
+  const concurrency = 3;
+  const fontFaces = await new PromisePool(iterator, concurrency).all();
 
-      return Promise.all(
-        fonts.map(
-          async (font) => `@font-face {
-        font-family: ${font.fontFace.family};
-        src: url(${await getSource(font)});
-          }`,
-        ),
-      );
-    }),
-  );
-
-  return fontFaces.flat();
+  // dedup just in case (i.e. could be the same font faces with 0 glyphs)
+  return Array.from(new Set(fontFaces));
 };
+
+function* fontFacesIterator(
+  families: Set<number>,
+  characters: string,
+  codePoints: Set<number>,
+): Generator<Promise<[number, string]>> {
+  // the order between the families is important, as fallbacks need to be defined first and in the reversed order
+  // so that they get overriden with the later defined font faces, i.e. in case they share some codepoints
+  const reversedFallbacks = Array.from(FONT_FAMILY_FALLBACKS.ordered).reverse();
+
+  for (const [familyIndex, family] of Array.from(families).entries()) {
+    const fallbackIndex = reversedFallbacks.findIndex(
+      (fallback) => fallback === family,
+    );
+
+    let order: number;
+
+    if (fallbackIndex !== -1) {
+      // making sure the fallback fonts are defined first
+      order = fallbackIndex;
+    } else {
+      // making sure the built-in font faces are always defined after fallback fonts
+      order = FONT_FAMILY_FALLBACKS.ordered.length + familyIndex;
+    }
+
+    // making a safe buffer in between the families, assuming there won't be more than 10k font faces per family
+    order *= 10_000;
+
+    const { fontFaces, metadata } = Fonts.registered.get(family) ?? {};
+
+    if (!Array.isArray(fontFaces)) {
+      console.error(
+        `Couldn't find registered fonts for font-family "${family}"`,
+        Fonts.registered,
+      );
+      continue;
+    }
+
+    if (metadata?.local) {
+      // don't inline local fonts
+      continue;
+    }
+
+    for (const [fontFaceIndex, fontFace] of fontFaces.entries()) {
+      const pendingFontFace = fontFace.toCSS(characters, codePoints);
+
+      // so that we don't add undefined to the pool
+      if (pendingFontFace) {
+        yield new Promise(async (resolve) => {
+          const promiseIndex = order + fontFaceIndex;
+          const fontFaceCSS = await pendingFontFace;
+          resolve([promiseIndex, fontFaceCSS]);
+        });
+      }
+    }
+  }
+}

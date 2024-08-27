@@ -1,7 +1,7 @@
 import LiberationSansRegular from "./LiberationSans-Regular.woff2";
-import type { ExcalidrawFontFace } from "../../ExcalidrawFont";
+import { type ExcalidrawFontFaceDescriptor } from "../..";
 
-export const LiberationFontFaces: ExcalidrawFontFace[] = [
+export const LiberationFontFaces: ExcalidrawFontFaceDescriptor[] = [
   {
     uri: LiberationSansRegular,
   },

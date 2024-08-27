@@ -1,7 +1,7 @@
 import ComicShannsRegular from "./ComicShanns-Regular.woff2";
-import type { ExcalidrawFontFace } from "../../ExcalidrawFont";
+import { type ExcalidrawFontFaceDescriptor } from "../..";
 
-export const ComicFontFaces: ExcalidrawFontFace[] = [
+export const ComicFontFaces: ExcalidrawFontFaceDescriptor[] = [
   {
     uri: ComicShannsRegular,
   },

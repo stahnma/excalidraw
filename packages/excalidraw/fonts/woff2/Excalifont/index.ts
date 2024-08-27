@@ -1,7 +1,7 @@
 import Excalifont from "./Excalifont-Regular.woff2";
-import type { ExcalidrawFontFace } from "../../ExcalidrawFont";
+import { type ExcalidrawFontFaceDescriptor } from "../..";
 
-export const ExcalifontFontFaces: ExcalidrawFontFace[] = [
+export const ExcalifontFontFaces: ExcalidrawFontFaceDescriptor[] = [
   {
     uri: Excalifont,
   },

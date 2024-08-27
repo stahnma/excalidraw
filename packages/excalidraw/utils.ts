@@ -1,9 +1,10 @@
+import Pool from "es6-promise-pool";
 import { COLOR_PALETTE } from "./colors";
 import type { EVENT } from "./constants";
 import {
-  CHINESE_HANDWRITTEN_FALLBACK_FONT,
   DEFAULT_VERSION,
   FONT_FAMILY,
+  FONT_FAMILY_FALLBACKS,
   isDarwin,
   WINDOWS_EMOJI_FALLBACK_FONT,
 } from "./constants";
@@ -89,8 +90,8 @@ export const getFontFamilyString = ({
 }) => {
   for (const [fontFamilyString, id] of Object.entries(FONT_FAMILY)) {
     if (id === fontFamily) {
-      // TODO: we should fallback first to generic family names first, rather than directly to the emoji font
-      return `${fontFamilyString}, ${CHINESE_HANDWRITTEN_FALLBACK_FONT}, ${WINDOWS_EMOJI_FALLBACK_FONT}`;
+      // TODO: we should fallback first to generic family names first
+      return `${fontFamilyString}, ${FONT_FAMILY_FALLBACKS.string}`;
     }
   }
   return WINDOWS_EMOJI_FALLBACK_FONT;
@@ -1167,3 +1168,43 @@ export const promiseTry = async <TValue, TArgs extends unknown[]>(
 
 export const isAnyTrue = (...args: boolean[]): boolean =>
   Math.max(...args.map((arg) => (arg ? 1 : 0))) > 0;
+
+// extending the missing types
+// relying on the [Index, T] to keep a correct order
+type TPromisePool<T, Index = number> = Pool<[Index, T][]> & {
+  addEventListener: (
+    type: "fulfilled",
+    listener: (event: { data: { result: [Index, T] } }) => void,
+  ) => (event: { data: { result: [Index, T] } }) => void;
+  removeEventListener: (
+    type: "fulfilled",
+    listener: (event: { data: { result: [Index, T] } }) => void,
+  ) => void;
+};
+
+export class PromisePool<T> {
+  private readonly pool: TPromisePool<T>;
+  private readonly entries: Record<number, T> = {};
+
+  constructor(
+    source: IterableIterator<Promise<[number, T]>>,
+    concurrency: number,
+  ) {
+    this.pool = new Pool(
+      source as unknown as () => void | PromiseLike<[number, T][]>,
+      concurrency,
+    ) as TPromisePool<T>;
+  }
+
+  public all() {
+    const listener = this.pool.addEventListener("fulfilled", (event) => {
+      const [index, value] = event.data.result;
+      this.entries[index] = value;
+    });
+
+    return this.pool.start().then(() => {
+      setTimeout(() => this.pool.removeEventListener("fulfilled", listener));
+      return Object.values(this.entries);
+    });
+  }
+}

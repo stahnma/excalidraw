@@ -10,12 +10,11 @@ import { isTextElement } from "../element";
 import { getFontString } from "../utils";
 import { FONT_FAMILY } from "../constants";
 import { FONT_METADATA, type FontMetadata } from "./metadata";
-import {
-  ExcalidrawFont,
-  type ExcalidrawFontFace,
-  type Font,
-} from "./ExcalidrawFont";
 import { getContainerElement } from "../element/textElement";
+import {
+  ExcalidrawFontFace,
+  type IExcalidrawFontFace,
+} from "./ExcalidrawFontFace";
 import { CascadiaFontFaces } from "./woff2/Cascadia";
 import { ComicFontFaces } from "./woff2/Comic";
 import { ExcalifontFontFaces } from "./woff2/Excalifont";
@@ -25,6 +24,7 @@ import { LilitaFontFaces } from "./woff2/Lilita";
 import { NunitoFontFaces } from "./woff2/Nunito";
 import { VirgilFontFaces } from "./woff2/Virgil";
 import { XiaolaiFontFaces } from "./woff2/Xiaolai";
+import { EmojiFontFaces } from "./woff2/Emoji";
 
 export class Fonts {
   // it's ok to track fonts across multiple instances only once, so let's use
@@ -36,7 +36,7 @@ export class Fonts {
         number,
         {
           metadata: FontMetadata;
-          fonts: Font[];
+          fontFaces: IExcalidrawFontFace[];
         }
       >
     | undefined;
@@ -148,13 +148,13 @@ export class Fonts {
     fontFamilies: Array<ExcalidrawTextElement["fontFamily"]>,
   ) {
     // add all registered font faces into the `document.fonts` (if not added already)
-    for (const { fonts, metadata } of Fonts.registered.values()) {
+    for (const { fontFaces, metadata } of Fonts.registered.values()) {
       // skip registering font faces for local fonts (i.e. Helvetica)
       if (metadata.local) {
         continue;
       }
 
-      for (const { fontFace } of fonts) {
+      for (const { fontFace } of fontFaces) {
         if (!window.document.fonts.has(fontFace)) {
           window.document.fonts.add(fontFace);
         }
@@ -179,7 +179,7 @@ export class Fonts {
             console.error(
               `Failed to load font "${fontString}" from urls "${Fonts.registered
                 .get(fontFamily)
-                ?.fonts.map((x) => x.urls)}"`,
+                ?.fontFaces.map((x) => x.urls)}"`,
               e,
             );
           }
@@ -199,17 +199,17 @@ export class Fonts {
     const fonts = {
       registered: new Map<
         ValueOf<typeof FONT_FAMILY>,
-        { metadata: FontMetadata; fonts: Font[] }
+        { metadata: FontMetadata; fontFaces: IExcalidrawFontFace[] }
       >(),
     };
 
     const init = (
       family: keyof typeof FONT_FAMILY,
-      ...fontFaces: ExcalidrawFontFace[]
+      ...fontFacesDescriptors: ExcalidrawFontFaceDescriptor[]
     ) => {
       const metadata = FONT_METADATA[FONT_FAMILY[family]];
 
-      register.call(fonts, family, metadata, ...fontFaces);
+      register.call(fonts, family, metadata, ...fontFacesDescriptors);
     };
 
     init("Cascadia", ...CascadiaFontFaces);
@@ -222,7 +222,10 @@ export class Fonts {
     init("Lilita One", ...LilitaFontFaces);
     init("Nunito", ...NunitoFontFaces);
     init("Virgil", ...VirgilFontFaces);
+
+    // fallback font faces
     init("Xiaolai", ...XiaolaiFontFaces);
+    init("Segoe UI Emoji", ...EmojiFontFaces);
 
     Fonts._initialized = true;
 
@@ -248,7 +251,7 @@ export class Fonts {
  *
  * @param family font family
  * @param metadata font metadata
- * @param faces font faces
+ * @param fontFacesDecriptors font faces descriptors
  */
 function register(
   this:
@@ -256,12 +259,12 @@ function register(
     | {
         registered: Map<
           ValueOf<typeof FONT_FAMILY>,
-          { metadata: FontMetadata; fonts: Font[] }
+          { metadata: FontMetadata; fontFaces: IExcalidrawFontFace[] }
         >;
       },
   family: string,
   metadata: FontMetadata,
-  ...faces: ExcalidrawFontFace[]
+  ...fontFacesDecriptors: ExcalidrawFontFaceDescriptor[]
 ) {
   // TODO: likely we will need to abandon number "id" in order to support custom fonts
   const familyId = FONT_FAMILY[family as keyof typeof FONT_FAMILY];
@@ -270,8 +273,9 @@ function register(
   if (!registeredFamily) {
     this.registered.set(familyId, {
       metadata,
-      fonts: faces.map(
-        ({ uri, descriptors }) => new ExcalidrawFont(family, uri, descriptors),
+      fontFaces: fontFacesDecriptors.map(
+        ({ uri, descriptors }) =>
+          new ExcalidrawFontFace(family, uri, descriptors),
       ),
     });
   }
@@ -309,3 +313,8 @@ export const getLineHeight = (fontFamily: FontFamilyValues) => {
 
   return lineHeight as ExcalidrawTextElement["lineHeight"];
 };
+
+export interface ExcalidrawFontFaceDescriptor {
+  uri: string;
+  descriptors?: FontFaceDescriptors;
+}

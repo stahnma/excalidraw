@@ -66,11 +66,11 @@ export const FontPickerList = React.memo(
           .filter(
             ([_, { metadata }]) => !metadata.serverSide && !metadata.fallback,
           )
-          .map(([familyId, { metadata, fonts }]) => {
+          .map(([familyId, { metadata, fontFaces }]) => {
             const fontDescriptor = {
               value: familyId,
               icon: metadata.icon ?? FontFamilyNormalIcon,
-              text: fonts[0].fontFace.family,
+              text: fontFaces[0]?.fontFace?.family ?? "Unknown",
             };
 
             if (metadata.deprecated) {

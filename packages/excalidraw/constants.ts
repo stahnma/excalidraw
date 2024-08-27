@@ -114,6 +114,9 @@ export const CLASSES = {
   SHAPE_ACTIONS_MENU: "App-menu__left",
 };
 
+export const CHINESE_HANDWRITTEN_FALLBACK_FONT = "Xiaolai";
+export const WINDOWS_EMOJI_FALLBACK_FONT = "Segoe UI Emoji";
+
 /**
  * // TODO: shouldn't be really `const`, likely neither have integers as values, due to value for the custom fonts, which should likely be some hash.
  *
@@ -133,7 +136,17 @@ export const FONT_FAMILY = {
   "Comic Shanns": 8,
   "Liberation Sans": 9,
   // from here on fallback fonts only
-  Xiaolai: 1000,
+  [CHINESE_HANDWRITTEN_FALLBACK_FONT]: 1000,
+  [WINDOWS_EMOJI_FALLBACK_FONT]: 9999,
+};
+
+// TODO: perahaps could be specific per-family in the future
+export const FONT_FAMILY_FALLBACKS = {
+  string: `${CHINESE_HANDWRITTEN_FALLBACK_FONT}, ${WINDOWS_EMOJI_FALLBACK_FONT}`,
+  ordered: [
+    FONT_FAMILY[CHINESE_HANDWRITTEN_FALLBACK_FONT],
+    FONT_FAMILY[WINDOWS_EMOJI_FALLBACK_FONT],
+  ],
 };
 
 export const THEME = {
@@ -156,10 +169,6 @@ export const FRAME_STYLE = {
   nameFontSize: 14,
   nameLineHeight: 1.25,
 };
-
-// TODO: consider adding a built-in fallback font for emojis
-export const WINDOWS_EMOJI_FALLBACK_FONT = "Segoe UI Emoji";
-export const CHINESE_HANDWRITTEN_FALLBACK_FONT = "Xiaolai";
 
 export const MIN_FONT_SIZE = 1;
 export const DEFAULT_FONT_SIZE = 20;

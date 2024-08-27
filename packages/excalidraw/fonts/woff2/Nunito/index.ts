@@ -5,9 +5,9 @@ import CyrilicExt from "https://fonts.gstatic.com/s/nunito/v26/XRXI3I6Li01BKofiO
 import Vietnamese from "https://fonts.gstatic.com/s/nunito/v26/XRXI3I6Li01BKofiOc5wtlZ2di8HDIkhdTs3j6zbXWjgevT5.woff2";
 
 import { GOOGLE_FONTS_RANGES } from "../../metadata";
-import type { ExcalidrawFontFace } from "../../ExcalidrawFont";
+import { type ExcalidrawFontFaceDescriptor } from "../..";
 
-export const NunitoFontFaces: ExcalidrawFontFace[] = [
+export const NunitoFontFaces: ExcalidrawFontFaceDescriptor[] = [
   {
     uri: CyrilicExt,
     descriptors: {
