@@ -25,8 +25,13 @@ export default defineConfig({
       output: {
         assetFileNames(chunkInfo) {
           if (chunkInfo?.name?.endsWith(".woff2")) {
-            // put on root so we are flexible about the CDN path
-            return "[name]-[hash][extname]";
+            // TODO: include subfolder in the names, thing about splitting also other fonts (and thus skipping hash
+            if (chunkInfo.name.includes("Xiaolai")) {
+              return "[name][extname]";
+            } else {
+              // put on root so we are flexible about the CDN path
+              return "[name]-[hash][extname]";
+            }
           }
 
           return "assets/[name]-[hash][extname]";
