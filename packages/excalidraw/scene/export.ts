@@ -465,15 +465,20 @@ const getFontFaces = async (
   }
 
   const uniqueChars = Array.from(characters).join("");
+  const uniqueCodePoints = Array.from(codePoints);
 
   // quick check for Han (might match a bit more, but that's fine)
   if (uniqueChars.match(/\p{Script=Han}/u)) {
     fontFamilies.add(FONT_FAMILY.Xiaolai);
   }
 
-  const iterator = fontFacesIterator(fontFamilies, uniqueChars, codePoints);
+  const iterator = fontFacesIterator(
+    fontFamilies,
+    uniqueChars,
+    uniqueCodePoints,
+  );
 
-  // don't trigger hundreds/thousands of concurrent requests, instead go 3 requests at a time, in a controlled manner
+  // don't trigger hundreds/thousands of concurrent requests, instead go three requests at a time, in a controlled manner
   // in other words, does not block the main thread and avoids related issues, including potential rate limits
   const concurrency = 3;
   const fontFaces = await new PromisePool(iterator, concurrency).all();
@@ -485,30 +490,13 @@ const getFontFaces = async (
 function* fontFacesIterator(
   families: Set<number>,
   characters: string,
-  codePoints: Set<number>,
+  codePoints: Array<number>,
 ): Generator<Promise<[number, string]>> {
   // the order between the families is important, as fallbacks need to be defined first and in the reversed order
   // so that they get overriden with the later defined font faces, i.e. in case they share some codepoints
-  const reversedFallbacks = Array.from(FONT_FAMILY_FALLBACKS.ordered).reverse();
+  const reversedFallbacks = Array.from(FONT_FAMILY_FALLBACKS.ARRAY).reverse();
 
   for (const [familyIndex, family] of Array.from(families).entries()) {
-    const fallbackIndex = reversedFallbacks.findIndex(
-      (fallback) => fallback === family,
-    );
-
-    let order: number;
-
-    if (fallbackIndex !== -1) {
-      // making sure the fallback fonts are defined first
-      order = fallbackIndex;
-    } else {
-      // making sure the built-in font faces are always defined after fallback fonts
-      order = FONT_FAMILY_FALLBACKS.ordered.length + familyIndex;
-    }
-
-    // making a safe buffer in between the families, assuming there won't be more than 10k font faces per family
-    order *= 10_000;
-
     const { fontFaces, metadata } = Fonts.registered.get(family) ?? {};
 
     if (!Array.isArray(fontFaces)) {
@@ -524,15 +512,32 @@ function* fontFacesIterator(
       continue;
     }
 
+    const fallbackIndex = reversedFallbacks.findIndex(
+      (fallback) => fallback === family,
+    );
+
+    let fontFamilyOrder: number;
+
+    if (fallbackIndex !== -1) {
+      // making sure the fallback fonts are defined first
+      fontFamilyOrder = fallbackIndex;
+    } else {
+      // making sure the built-in font faces are always defined after fallback fonts
+      fontFamilyOrder = FONT_FAMILY_FALLBACKS.ARRAY.length + familyIndex;
+    }
+
+    // making a safe buffer in between the families, assuming there won't be more than 10k font faces per family
+    fontFamilyOrder *= 10_000;
+
     for (const [fontFaceIndex, fontFace] of fontFaces.entries()) {
       const pendingFontFace = fontFace.toCSS(characters, codePoints);
 
       // so that we don't add undefined to the pool
       if (pendingFontFace) {
+        const fontFaceOrder = fontFamilyOrder + fontFaceIndex;
         yield new Promise(async (resolve) => {
-          const promiseIndex = order + fontFaceIndex;
           const fontFaceCSS = await pendingFontFace;
-          resolve([promiseIndex, fontFaceCSS]);
+          resolve([fontFaceOrder, fontFaceCSS]);
         });
       }
     }

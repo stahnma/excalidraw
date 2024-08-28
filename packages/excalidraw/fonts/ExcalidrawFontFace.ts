@@ -1,14 +1,12 @@
-import { stringToBase64, toByteString } from "../data/encode";
 import { LOCAL_FONT_PROTOCOL } from "./metadata";
-import loadWoff2 from "./wasm/woff2.loader";
-import loadHbSubset from "./wasm/hb-subset.loader";
+import { subset } from "./subset/subset.main";
 
 export interface IExcalidrawFontFace {
   urls: URL[];
   fontFace: FontFace;
   toCSS(
     characters: string,
-    codePoints: Set<number>,
+    codePoints: Array<number>,
   ): Promise<string> | undefined;
 }
 
@@ -44,7 +42,7 @@ export class ExcalidrawFontFace implements IExcalidrawFontFace {
    */
   public toCSS(
     characters: string,
-    codePoints: Set<number>,
+    codePoints: Array<number>,
   ): Promise<string> | undefined {
     const unicodeRangeRegex = this.fontFace.unicodeRange
       .split(", ")
@@ -79,7 +77,7 @@ export class ExcalidrawFontFace implements IExcalidrawFontFace {
    *
    * @returns base64 with subsetted glyphs based on the passed codepoint, last defined url otherwise
    */
-  private async getContent(codePoints: ReadonlySet<number>): Promise<string> {
+  private async getContent(codePoints: Array<number>): Promise<string> {
     let i = 0;
     const errorMessages = [];
 
@@ -94,11 +92,7 @@ export class ExcalidrawFontFace implements IExcalidrawFontFace {
             "base64",
           ).buffer;
 
-          const base64 = await ExcalidrawFontFace.subsetGlyphsByCodePoints(
-            arrayBuffer,
-            codePoints,
-          );
-
+          const base64 = await subset(arrayBuffer, codePoints);
           return base64;
         }
 
@@ -110,11 +104,7 @@ export class ExcalidrawFontFace implements IExcalidrawFontFace {
 
         if (response.ok) {
           const arrayBuffer = await response.arrayBuffer();
-          const base64 = await ExcalidrawFontFace.subsetGlyphsByCodePoints(
-            arrayBuffer,
-            codePoints,
-          );
-
+          const base64 = await subset(arrayBuffer, codePoints);
           return base64;
         }
 
@@ -139,48 +129,6 @@ export class ExcalidrawFontFace implements IExcalidrawFontFace {
     // in case of issues, at least return the last url as a content
     // defaults to unpkg for bundled fonts (so that we don't have to host them forever) and http url for others
     return this.urls.length ? this.urls[this.urls.length - 1].toString() : "";
-  }
-
-  /**
-   * Tries to subset glyphs in a font based on the used codepoints, returning the font as daturl.
-   *
-   * @param arrayBuffer font data buffer, preferrably in the woff2 format, though others should work as well
-   * @param codePoints codepoints used to subset the glyphs
-   *
-   * @returns font with subsetted glyphs (all glyphs in case of errors) converted into a dataurl
-   */
-  private static async subsetGlyphsByCodePoints(
-    arrayBuffer: ArrayBuffer,
-    codePoints: ReadonlySet<number>,
-  ): Promise<string> {
-    try {
-      // lazy loaded wasm modules to avoid multiple initializations in case of concurrent triggers
-      const { compress, decompress } = await loadWoff2();
-      const { subset } = await loadHbSubset();
-
-      const decompressedBinary = decompress(arrayBuffer).buffer;
-      const subsetSnft = subset(decompressedBinary, codePoints);
-      const compressedBinary = compress(subsetSnft.buffer);
-
-      return ExcalidrawFontFace.toBase64(compressedBinary.buffer);
-    } catch (e) {
-      console.error("Skipped glyph subsetting", e);
-      // Fallback to encoding whole font in case of errors
-      return ExcalidrawFontFace.toBase64(arrayBuffer);
-    }
-  }
-
-  private static async toBase64(arrayBuffer: ArrayBuffer) {
-    let base64: string;
-
-    if (typeof Buffer !== "undefined") {
-      // node + server-side
-      base64 = Buffer.from(arrayBuffer).toString("base64");
-    } else {
-      base64 = await stringToBase64(await toByteString(arrayBuffer), true);
-    }
-
-    return `data:font/woff2;base64,${base64}`;
   }
 
   private static createUrls(uri: string): URL[] {
