@@ -13,25 +13,32 @@ const load = (): Promise<{
     codePoints: ReadonlySet<number>,
   ) => Uint8Array;
 }> => {
-  return new Promise(async (resolve) => {
-    WebAssembly.instantiate(binary).then((module) => {
-      const harfbuzzJsWasm = module.instance.exports;
-      // @ts-expect-error since `.buffer` is custom prop
-      const heapu8 = new Uint8Array(harfbuzzJsWasm.memory.buffer);
+  return new Promise(async (resolve, reject) => {
+    try {
+      WebAssembly.instantiate(binary).then((module) => {
+        const harfbuzzJsWasm = module.instance.exports;
+        // @ts-expect-error since `.buffer` is custom prop
+        const heapu8 = new Uint8Array(harfbuzzJsWasm.memory.buffer);
 
-      const hbSubset = {
-        subset: (fontBuffer: ArrayBuffer, codePoints: ReadonlySet<number>) => {
-          return bindings.subset(
-            harfbuzzJsWasm,
-            heapu8,
-            fontBuffer,
-            codePoints,
-          );
-        },
-      };
+        const hbSubset = {
+          subset: (
+            fontBuffer: ArrayBuffer,
+            codePoints: ReadonlySet<number>,
+          ) => {
+            return bindings.subset(
+              harfbuzzJsWasm,
+              heapu8,
+              fontBuffer,
+              codePoints,
+            );
+          },
+        };
 
-      resolve(hbSubset);
-    });
+        resolve(hbSubset);
+      });
+    } catch (e) {
+      reject(e);
+    }
   });
 };
 
