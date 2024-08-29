@@ -1,8 +1,8 @@
 import { Commands, subsetToBinary } from "./subset.shared";
 
 /**
- * Thanks to this export (and related import), this worker code will be included in the bundle automatically,
- * without the need for esbuild/vite/rollup plugins and special browser/server treatment.
+ * Due to this export (and related dynamic import), this worker code will be included in the bundle automatically (as a separate chunk),
+ * without the need for esbuild / vite /rollup plugins and special browser / server treatment.
  */
 export const WorkerUrl = new URL(import.meta.url);
 

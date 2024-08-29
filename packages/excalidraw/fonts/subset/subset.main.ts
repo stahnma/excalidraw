@@ -21,6 +21,8 @@ const loadSharedSubsetChunk = async () => {
   return subsetShared;
 };
 
+let shouldUseWorkers = typeof Worker !== "undefined";
+
 // TODO: could be extended with multiple commands in the future
 type WorkerData = { command: typeof Commands.Subset; arrayBuffer: ArrayBuffer };
 
@@ -33,7 +35,7 @@ let workerPool: Promise<
 
 const getWorkerPool = (codePoints: Array<number>) => {
   if (!workerPool) {
-    // immediately return to be concurrency-friendly and have really only one pool instance
+    // immediate concurrency-friendly return, to ensure we have only one pool instance
     workerPool = new Promise(async (resolve, reject) => {
       try {
         const { WorkerUrl } = await loadWorkerSubsetChunk();
@@ -61,8 +63,15 @@ const getWorkerPool = (codePoints: Array<number>) => {
   return workerPool;
 };
 
-let shouldUseWorkers = typeof Worker !== "undefined";
-
+/**
+ * Tries to subset glyphs in a font based on the used codepoints, returning the font as daturl.
+ * Under the hood utilizes worker threads (Web Workers, if available), otherwise fallbacks to the main thread.
+ *
+ * @param arrayBuffer font data buffer, preferrably in the woff2 format, though others should work as well
+ * @param codePoints codepoints used to subset the glyphs
+ *
+ * @returns font with subsetted glyphs (all glyphs in case of errors) converted into a dataurl
+ */
 export const subsetWoff2GlyphsByCodepoints = async (
   arrayBuffer: ArrayBuffer,
   codePoints: Array<number>,
@@ -72,7 +81,9 @@ export const subsetWoff2GlyphsByCodepoints = async (
   if (shouldUseWorkers) {
     return new Promise(async (resolve) => {
       try {
+        // lazy initialize the worker pool
         const workerPool = await getWorkerPool(codePoints);
+        // takes idle worker from the pool or creates a new one
         const result = await workerPool.postMessage(
           {
             command: Commands.Subset,
@@ -81,6 +92,7 @@ export const subsetWoff2GlyphsByCodepoints = async (
           { transfer: [arrayBuffer] },
         );
 
+        // encode on the main thread to avoid copying large binary strings (as dataurl) between threads
         resolve(toBase64(result));
       } catch (e) {
         // don't use workers if they are failing

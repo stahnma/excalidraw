@@ -1,10 +1,8 @@
 import loadWoff2 from "../wasm/woff2.loader";
 import loadHbSubset from "../wasm/hb-subset.loader";
 
-// TODO: it's not super clear which of these is shared between threads and which one is isomoprhic from the browser / node perspective
-
 /**
- * Shared code between the main thread and the worker.
+ * Shared commands between the main thread and worker threads.
  */
 export const Commands = {
   Init: "INIT",
@@ -12,7 +10,9 @@ export const Commands = {
 } as const;
 
 /**
- * Used by browser and node to subset the font based on the passed codepoints.
+ * Used by browser (main thread), node and jsdom, to subset the font based on the passed codepoints.
+ * 
+ * @returns woff2 font as a base64 encoded string
  */
 export const subsetToBase64 = async (
   arrayBuffer: ArrayBuffer,
@@ -29,15 +29,16 @@ export const subsetToBase64 = async (
 };
 
 /**
- * Used by both browser, node and the worker to subset the font based on the passed codepoints.
- * Accepting and returning ArrayBuffer to avoid copying large strings between workers and main thread.
+ * Used by browser (worker thread) and as part of `subsetToBase64`, to subset the font based on the passed codepoints.
+ *
+ * @eturns woff2 font as an ArrayBuffer, to avoid copying large strings between worker threads and the main thread.
  */
 export const subsetToBinary = async (
   arrayBuffer: ArrayBuffer,
   codePoints: Array<number>,
 ): Promise<ArrayBuffer> => {
   // lazy loaded wasm modules to avoid multiple initializations in case of concurrent triggers
-  // NOTE: could be expensive in case of being loaded as part of each new worker instance, so we need to keep the # of workes small
+  // IMPORTANT: could be expensive, as each new worker instance lazy loads these to their own memory - keep the # of workes small
   const { compress, decompress } = await loadWoff2();
   const { subset } = await loadHbSubset();
 
@@ -49,17 +50,21 @@ export const subsetToBinary = async (
 };
 
 /**
- * Utility for both node and browser usage.
- * Isn't used inside the worker as we would like to avoid copying large binary strings (as dataurl) between workers and main thread.
+ * Util for isomoprhic browser (main thread) and node, jsdom usage.
+ *
+ * Isn't used inside the worker to avoid copying large binary strings (as dataurl) between worker threads and the main thread.
  */
 export const toBase64 = async (arrayBuffer: ArrayBuffer) => {
   let base64: string;
 
   if (typeof Buffer !== "undefined") {
-    // node & server-side
+    // node, jsdom
     base64 = Buffer.from(arrayBuffer).toString("base64");
   } else {
-    // browser - it's perfectly fine to treat each byte independently as we care only about turning individual bytes into codepoints, not about multi-byte unicode characters
+    // browser (main thread)
+    //it's perfectly fine to treat each byte independently,
+    // as we care only about turning individual bytes into codepoints,
+    // not about multi-byte unicode characters
     const byteString = String.fromCharCode(...new Uint8Array(arrayBuffer));
     base64 = btoa(byteString);
   }
