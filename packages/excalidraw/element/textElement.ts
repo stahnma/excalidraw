@@ -50,8 +50,8 @@ export const containsKorean = (text: string) => {
 };
 
 export const containsEmoji = (text: string) => {
-  // should cover most emojis, including skin tone, gender variations, pictographic chars and etc.
-  const emojiRegex = /[\p{Emoji_Presentation}\p{Emoji}\p{Extended_Pictographic}\u{1F3FB}-\u{1F3FF}\u{1F9B0}-\u{1F9B3}]/u;
+  // shouldcovers most emojis, including skin tone, gender variations, pictographic chars and etc.
+  const emojiRegex = /\p{Emoji_Presentation}|\p{Extended_Pictographic}/u;
   return emojiRegex.test(text);
 };
 
@@ -435,19 +435,45 @@ export const getTextHeight = (
 export const parseTokens = (text: string) => {
   // Splitting words containing "-" as those are treated as separate words
   // by css wrapping algorithm eg non-profit => non-, profit
-  const words = text.split("-");
-  if (words.length > 1) {
+  const segments = text.split("-");
+  if (segments.length > 1) {
     // non-proft org => ['non-', 'profit org']
-    words.forEach((word, index) => {
-      if (index !== words.length - 1) {
-        words[index] = word += "-";
+    segments.forEach((word, index) => {
+      if (index !== segments.length - 1) {
+        segments[index] = word += "-";
       }
     });
   }
   // Joining the words with space and splitting them again with space to get the
   // final list of tokens
   // ['non-', 'profit org'] =>,'non- proft org' => ['non-','profit','org']
-  return words.join(" ").split(" ");
+  const words = segments.join(" ").split(" ");
+
+  let tokens = words;
+  // quick check for the whole text
+  if (containsCJK(text) || containsEmoji(text)) {
+    tokens = words.flatMap((word) => {
+      // quick check for the word
+      if (containsCJK(word) || containsEmoji(word)) {
+        // using Array.from to accomodate for multi-byte characters
+        return Array.from(word).reduce((tokens, char) => {
+          if (tokens.length === 0 || containsCJK(char) || containsEmoji(char)) {
+            // treat CJK and emoji characters as individual tokens due to wrapping
+            tokens.push(char);
+          } else {
+            // keep joining chars until we encounter a CJK or emoji char
+            tokens[tokens.length - 1] += char;
+          }
+
+          return tokens;
+        }, [] as string[]);
+      }
+
+      return word;
+    });
+  }
+
+  return tokens;
 };
 
 export const wrapText = (
@@ -566,7 +592,9 @@ export const wrapText = (
 
           // if word ends with "-" then we don't need to add space
           // to sync with css word-wrap
-          const shouldAppendSpace = !word.endsWith("-");
+          const shouldAppendSpace =
+            !word.endsWith("-") && !containsCJK(word) && !containsEmoji(word);
+
           currentLine += word;
 
           if (shouldAppendSpace) {
@@ -590,8 +618,9 @@ export const wrapText = (
     if (currentLine.slice(-1) === " ") {
       // only remove last trailing space which we have added when joining words
       currentLine = currentLine.slice(0, -1);
-      push(currentLine);
     }
+
+    push(currentLine);
   }
 
   return lines.join("\n");
