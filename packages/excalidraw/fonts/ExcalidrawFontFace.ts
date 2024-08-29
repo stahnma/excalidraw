@@ -1,5 +1,5 @@
 import { LOCAL_FONT_PROTOCOL } from "./metadata";
-import { subset } from "./subset/subset.main";
+import { subsetWoff2GlyphsByCodepoints } from "./subset/subset.main";
 
 export interface IExcalidrawFontFace {
   urls: URL[];
@@ -92,7 +92,10 @@ export class ExcalidrawFontFace implements IExcalidrawFontFace {
             "base64",
           ).buffer;
 
-          const base64 = await subset(arrayBuffer, codePoints);
+          const base64 = await subsetWoff2GlyphsByCodepoints(
+            arrayBuffer,
+            codePoints,
+          );
           return base64;
         }
 
@@ -104,7 +107,10 @@ export class ExcalidrawFontFace implements IExcalidrawFontFace {
 
         if (response.ok) {
           const arrayBuffer = await response.arrayBuffer();
-          const base64 = await subset(arrayBuffer, codePoints);
+          const base64 = await subsetWoff2GlyphsByCodepoints(
+            arrayBuffer,
+            codePoints,
+          );
           return base64;
         }
 

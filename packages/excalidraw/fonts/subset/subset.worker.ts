@@ -35,6 +35,7 @@ if (typeof window === "undefined" && typeof self !== "undefined") {
           e.data.arrayBuffer,
           cachedCodePoints,
         );
+
         self.postMessage(buffer, { transfer: [buffer] });
         break;
     }
