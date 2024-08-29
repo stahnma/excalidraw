@@ -97,7 +97,6 @@ export const subsetWoff2GlyphsByCodepoints = async (
       } catch (e) {
         // don't use workers if they are failing
         shouldUseWorkers = false;
-        console.error(e);
 
         // fallback to the main thread
         resolve(subsetToBase64(arrayBuffer, codePoints));

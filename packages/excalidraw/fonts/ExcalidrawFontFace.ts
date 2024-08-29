@@ -77,7 +77,7 @@ export class ExcalidrawFontFace implements IExcalidrawFontFace {
    *
    * @returns base64 with subsetted glyphs based on the passed codepoint, last defined url otherwise
    */
-  private async getContent(codePoints: Array<number>): Promise<string> {
+  public async getContent(codePoints: Array<number>): Promise<string> {
     let i = 0;
     const errorMessages = [];
 
