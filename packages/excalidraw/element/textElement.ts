@@ -30,6 +30,31 @@ import {
 } from "./containerCache";
 import type { ExtractSetType } from "../utility-types";
 
+export const containsCJK = (text: string) => {
+  return /\p{Script=Han}|\p{Script=Hiragana}|\p{Script=Katakana}|\p{Script=Hangul}/u.test(
+    text,
+  );
+};
+
+export const containsJapanese = (text: string) => {
+  // Kanji (Han) is checked by `containsChinese`
+  return /\p{Script=Hiragana}|\p{Script=Katakana}/u.test(text);
+};
+
+export const containsChinese = (text: string) => {
+  return /\p{Script=Han}/u.test(text);
+};
+
+export const containsKorean = (text: string) => {
+  return /\p{Script=Hangul}/u.test(text);
+};
+
+export const containsEmoji = (text: string) => {
+  // should cover most emojis, including skin tone, gender variations, pictographic chars and etc.
+  const emojiRegex = /[\p{Emoji_Presentation}\p{Emoji}\p{Extended_Pictographic}\u{1F3FB}-\u{1F3FF}\u{1F9B0}-\u{1F9B3}]/u;
+  return emojiRegex.test(text);
+};
+
 export const normalizeText = (text: string) => {
   return (
     normalizeEOL(text)

@@ -55,7 +55,7 @@ export class ExcalidrawFontFace implements IExcalidrawFontFace {
       })
       .join("");
 
-    if (!new RegExp(`[${unicodeRangeRegex}]`).exec(characters)) {
+    if (!new RegExp(`[${unicodeRangeRegex}]`).test(characters)) {
       // quick exit, so that this does not count as a pending promsie
       return;
     }

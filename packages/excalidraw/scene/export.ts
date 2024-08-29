@@ -46,6 +46,7 @@ import type { RenderableElementsMap } from "./types";
 import { syncInvalidIndices } from "../fractionalIndex";
 import { renderStaticScene } from "../renderer/staticScene";
 import { Fonts } from "../fonts";
+import { containsChinese } from "../element/textElement";
 
 const SVG_EXPORT_TAG = `<!-- svg-source:excalidraw -->`;
 
@@ -467,8 +468,8 @@ const getFontFaces = async (
   const uniqueChars = Array.from(characters).join("");
   const uniqueCodePoints = Array.from(codePoints);
 
-  // quick check for Han (might match a bit more, but that's fine)
-  if (uniqueChars.match(/\p{Script=Han}/u)) {
+  // quick check for Han, might match a bit more, which is fine
+  if (containsChinese(uniqueChars)) {
     fontFamilies.add(FONT_FAMILY.Xiaolai);
   }
 
