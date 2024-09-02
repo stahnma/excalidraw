@@ -31,8 +31,8 @@ export class WorkerPool<T, R> {
     },
   ) {
     this.workerUrl = workerUrl;
-    // by default, active & idle workers will be terminated after 10 seconds of inactivity
-    this.workerTTL = options.ttl || 10_000;
+    // by default, active & idle workers will be terminated after 5 seconds of inactivity
+    this.workerTTL = options.ttl || 5_000;
 
     this.initWorker = options.initWorker;
   }

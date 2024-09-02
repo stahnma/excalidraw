@@ -62,10 +62,8 @@ export class ExcalidrawFontFace implements IExcalidrawFontFace {
 
     return new Promise<string>((resolve) => {
       this.getContent(codePoints).then((content) => {
-        resolve(`@font-face {
-          font-family: ${this.fontFace.family};
-          src: url(${content});
-        }`);
+        resolve(`
+          @font-face { font-family: ${this.fontFace.family}; src: url(${content}); }`);
       });
     });
   }

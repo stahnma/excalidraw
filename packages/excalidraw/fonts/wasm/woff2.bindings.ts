@@ -47,6 +47,7 @@ const Module = (function () {
         moduleOverrides[key] = Module[key];
       }
     }
+
     let arguments_ = [];
     let thisProgram = "./this.program";
     let quit_ = function (status, toThrow) {
@@ -3917,6 +3918,7 @@ const Module = (function () {
     let calledRun;
     Module.then = function (func) {
       if (calledRun) {
+        throw new Error("1 This error should be silently swallowed");
         func(Module);
       } else {
         const old = Module.onRuntimeInitialized;
@@ -3924,6 +3926,7 @@ const Module = (function () {
           if (old) {
             old();
           }
+          throw new Error("This error should be silently swallowed 1");
           func(Module);
         };
       }
@@ -4046,3 +4049,5 @@ const Module = (function () {
 })();
 
 export default Module;
+
+
