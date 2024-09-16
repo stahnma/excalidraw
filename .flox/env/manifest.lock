@@ -1,0 +1,278 @@
+{
+  "lockfile-version": 1,
+  "manifest": {
+    "version": 1,
+    "install": {
+      "coreutils": {
+        "pkg-path": "coreutils"
+      },
+      "yarn": {
+        "pkg-path": "yarn"
+      }
+    },
+    "vars": {},
+    "hook": {},
+    "profile": {},
+    "options": {
+      "systems": [
+        "aarch64-darwin",
+        "aarch64-linux",
+        "x86_64-darwin",
+        "x86_64-linux"
+      ],
+      "allow": {
+        "licenses": []
+      },
+      "semver": {}
+    },
+    "services": {},
+    "build": {
+      "excalidraw": {
+        "command": "yarn; yarn build; ",
+        "files": null,
+        "systems": null,
+        "sandbox": "off"
+      }
+    }
+  },
+  "packages": [
+    {
+      "attr_path": "coreutils",
+      "broken": false,
+      "derivation": "/nix/store/55ms78kc0r5ncpa13wbpya7cgi6i6zx0-coreutils-9.5.drv",
+      "description": "GNU Core Utilities",
+      "install_id": "coreutils",
+      "license": "GPL-3.0-or-later",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=345c263f2f53a3710abe117f28a5cb86d0ba4059",
+      "name": "coreutils-9.5",
+      "pname": "coreutils",
+      "rev": "345c263f2f53a3710abe117f28a5cb86d0ba4059",
+      "rev_count": 680873,
+      "rev_date": "2024-09-13T16:03:24Z",
+      "scrape_date": "2024-09-16T03:14:12Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "9.5",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "info": "/nix/store/ps81dqzr6fxafmxih1834v545dh4apjm-coreutils-9.5-info",
+        "out": "/nix/store/1l41471x6rlf7l544s1bxkqqgpprd28m-coreutils-9.5"
+      },
+      "system": "aarch64-darwin",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "coreutils",
+      "broken": false,
+      "derivation": "/nix/store/fbnqx9d9skgp22g0xkc53jgqy0804afb-coreutils-9.5.drv",
+      "description": "GNU Core Utilities",
+      "install_id": "coreutils",
+      "license": "GPL-3.0-or-later",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=345c263f2f53a3710abe117f28a5cb86d0ba4059",
+      "name": "coreutils-9.5",
+      "pname": "coreutils",
+      "rev": "345c263f2f53a3710abe117f28a5cb86d0ba4059",
+      "rev_count": 680873,
+      "rev_date": "2024-09-13T16:03:24Z",
+      "scrape_date": "2024-09-16T03:14:12Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "9.5",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "debug": "/nix/store/g66h1ajc1wx18milg2290yylbivq2jhd-coreutils-9.5-debug",
+        "info": "/nix/store/y311wv5dlqakkq6hr3yl6zmiiprxb3v5-coreutils-9.5-info",
+        "out": "/nix/store/ssqdazslv2wjpybnk0pjwnpq0dfpa6q2-coreutils-9.5"
+      },
+      "system": "aarch64-linux",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "coreutils",
+      "broken": false,
+      "derivation": "/nix/store/r3vjhg84a2d0ydf52038pic8wibaxbpr-coreutils-9.5.drv",
+      "description": "GNU Core Utilities",
+      "install_id": "coreutils",
+      "license": "GPL-3.0-or-later",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=345c263f2f53a3710abe117f28a5cb86d0ba4059",
+      "name": "coreutils-9.5",
+      "pname": "coreutils",
+      "rev": "345c263f2f53a3710abe117f28a5cb86d0ba4059",
+      "rev_count": 680873,
+      "rev_date": "2024-09-13T16:03:24Z",
+      "scrape_date": "2024-09-16T03:14:12Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "9.5",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "info": "/nix/store/jgslj3bb2rs55xaaxarqwsg7bppfxg8p-coreutils-9.5-info",
+        "out": "/nix/store/mw0amk6q5v2401y3s8zg7hxa2v0ia6vw-coreutils-9.5"
+      },
+      "system": "x86_64-darwin",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "coreutils",
+      "broken": false,
+      "derivation": "/nix/store/57hlz5fnvfgljivf7p18fmcl1yp6d29z-coreutils-9.5.drv",
+      "description": "GNU Core Utilities",
+      "install_id": "coreutils",
+      "license": "GPL-3.0-or-later",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=345c263f2f53a3710abe117f28a5cb86d0ba4059",
+      "name": "coreutils-9.5",
+      "pname": "coreutils",
+      "rev": "345c263f2f53a3710abe117f28a5cb86d0ba4059",
+      "rev_count": 680873,
+      "rev_date": "2024-09-13T16:03:24Z",
+      "scrape_date": "2024-09-16T03:14:12Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "9.5",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "debug": "/nix/store/73i7cdbz2w862wx1gfxxvyrw95rmmwl3-coreutils-9.5-debug",
+        "info": "/nix/store/p1mj9zdizsa605xsy3jjx4db4ya1wnix-coreutils-9.5-info",
+        "out": "/nix/store/0kg70swgpg45ipcz3pr2siidq9fn6d77-coreutils-9.5"
+      },
+      "system": "x86_64-linux",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "yarn",
+      "broken": false,
+      "derivation": "/nix/store/8brn40302fkwarnw0x2s9dlz0pm1cn7g-yarn-1.22.22.drv",
+      "description": "Fast, reliable, and secure dependency management for javascript",
+      "install_id": "yarn",
+      "license": "BSD-2-Clause",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=345c263f2f53a3710abe117f28a5cb86d0ba4059",
+      "name": "yarn-1.22.22",
+      "pname": "yarn",
+      "rev": "345c263f2f53a3710abe117f28a5cb86d0ba4059",
+      "rev_count": 680873,
+      "rev_date": "2024-09-13T16:03:24Z",
+      "scrape_date": "2024-09-16T03:14:12Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "1.22.22",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "out": "/nix/store/6j0fflbrszc5k5kd7m36mn9ga6ds8zmr-yarn-1.22.22"
+      },
+      "system": "aarch64-darwin",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "yarn",
+      "broken": false,
+      "derivation": "/nix/store/y916q507bvddl74fd91fa94bw9w532h5-yarn-1.22.22.drv",
+      "description": "Fast, reliable, and secure dependency management for javascript",
+      "install_id": "yarn",
+      "license": "BSD-2-Clause",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=345c263f2f53a3710abe117f28a5cb86d0ba4059",
+      "name": "yarn-1.22.22",
+      "pname": "yarn",
+      "rev": "345c263f2f53a3710abe117f28a5cb86d0ba4059",
+      "rev_count": 680873,
+      "rev_date": "2024-09-13T16:03:24Z",
+      "scrape_date": "2024-09-16T03:14:12Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "1.22.22",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "out": "/nix/store/d1f5qfjkc24v2ng46x0qjsbiwrdfa6d3-yarn-1.22.22"
+      },
+      "system": "aarch64-linux",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "yarn",
+      "broken": false,
+      "derivation": "/nix/store/z1fwf55r5wgwqdx0drh0cwl336qwxz9g-yarn-1.22.22.drv",
+      "description": "Fast, reliable, and secure dependency management for javascript",
+      "install_id": "yarn",
+      "license": "BSD-2-Clause",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=345c263f2f53a3710abe117f28a5cb86d0ba4059",
+      "name": "yarn-1.22.22",
+      "pname": "yarn",
+      "rev": "345c263f2f53a3710abe117f28a5cb86d0ba4059",
+      "rev_count": 680873,
+      "rev_date": "2024-09-13T16:03:24Z",
+      "scrape_date": "2024-09-16T03:14:12Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "1.22.22",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "out": "/nix/store/vfi9zsfiwq5yia28nx04zdmr9ij6nhi3-yarn-1.22.22"
+      },
+      "system": "x86_64-darwin",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "yarn",
+      "broken": false,
+      "derivation": "/nix/store/kkxl249mw9yl8hcnxivc0x7dfip8zz3c-yarn-1.22.22.drv",
+      "description": "Fast, reliable, and secure dependency management for javascript",
+      "install_id": "yarn",
+      "license": "BSD-2-Clause",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=345c263f2f53a3710abe117f28a5cb86d0ba4059",
+      "name": "yarn-1.22.22",
+      "pname": "yarn",
+      "rev": "345c263f2f53a3710abe117f28a5cb86d0ba4059",
+      "rev_count": 680873,
+      "rev_date": "2024-09-13T16:03:24Z",
+      "scrape_date": "2024-09-16T03:14:12Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "1.22.22",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "out": "/nix/store/9yd6frl42syv6vncdy619zblj2vg406g-yarn-1.22.22"
+      },
+      "system": "x86_64-linux",
+      "group": "toplevel",
+      "priority": 5
+    }
+  ]
+}
