@@ -48,7 +48,7 @@ coreutils.pkg-path = "coreutils"
 
 [build.excalidraw]
 # The `build` section allows you to define build steps for your environment.
-command = "yarn; yarn build; "
+command = "yarn install; yarn build; cp -pr  excalidraw-app/build $out"
 sandbox = "off"
 
 # The `[services]` section of the manifest allows you to define services.
@@ -56,6 +56,7 @@ sandbox = "off"
 # and any variables you've defined in the `[vars]` section or `hook.on-activate` script.
 [services]
 # postgres.command = "postgres --config-file=pg.conf"
+
 
 # Additional options can be set in the `[options]` section. Refer to
 # manifest.toml(5) for a list of available options.

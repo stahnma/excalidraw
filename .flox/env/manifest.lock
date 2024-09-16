@@ -28,7 +28,7 @@
     "services": {},
     "build": {
       "excalidraw": {
-        "command": "yarn; yarn build; ",
+        "command": "yarn install; yarn build; cp -pr  excalidraw-app/build $out",
         "files": null,
         "systems": null,
         "sandbox": "off"
